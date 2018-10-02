@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "189753759307",
+    "firebase_url": "https://perfectmatchapp-7dafa.firebaseio.com",
+    "project_id": "perfectmatchapp-7dafa",
+    "storage_bucket": "perfectmatchapp-7dafa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189753759307:android:cc035043b4ac0f94",
+        "android_client_info": {
+          "package_name": "com.perfectmatchapp.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "189753759307-guf15vq3vvv3qcgublbge04ocsjkntu1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBY0WJzQz5Zq5POZNB8us7xI2_FQWa8JsI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

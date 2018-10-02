@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PerfectMatchApp</string>
+    <string name="facebook_app_id">494624180986294</string>
+    <string name="fb_login_protocol_scheme">fb494624180986294</string>
+</resources>
