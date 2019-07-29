@@ -28,7 +28,7 @@ const Confirm = ({children, visible, onAccept, onDecline}) => {
 
 const styles = {
   cardSectionStyle: {
-    justifyContent: 'center'
+    
   },
   textStyle: {
     fontSize: 18,

@@ -78,16 +78,11 @@ class FriendList extends Component {
     console.log("renderButton");
     if(friendData.matched) {
       return <Text style={{color: 'green'}}>Matched</Text>
-    } else if (friendData.actionTakenOnRequest === 'DECLINED') {
-      return (
-        <Button onPress={this.undoRequest(friendData)}>
-          <Text>Undo</Text>
-        </Button>
-      )
     } else {
       var disableButton = (('sentTextAt' in friendData) && (friendData.sentTextAt != null)) ||
                           (('sentMatchRequestAt' in friendData) && (friendData.sentMatchRequestAt != null)) ||
-                          (('hasReceivedRequest' in friendData) && (friendData.hasReceivedRequest))
+                          (('hasReceivedRequest' in friendData) && (friendData.hasReceivedRequest)) ||
+                          (('actionTakenOnRequest' in friendData) && (friendData.actionTakenOnRequest === 'DECLINED'))
                           ? true
                           : false;
       console.log("disableButton :", disableButton);

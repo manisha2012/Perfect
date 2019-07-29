@@ -73,6 +73,10 @@ class Notifications extends Component {
     return function (e) {
       var {friend, _id, text, createdAt} = notifData;
       console.log("on decline request :", friend);
+      Toast.show({
+                text: 'Request has been declined!',
+                buttonText: 'Okay'
+              });
 
       this.props.updateNotifications(_id, 'DECLINED');
       var notifArr = this.props.notifications;

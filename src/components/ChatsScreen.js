@@ -3,7 +3,7 @@ import {ListView, TouchableWithoutFeedback, TouchableOpacity} from 'react-native
 import { Container, Header, View, Content, List, ListItem, Thumbnail, Text, Left, Body, Right, Button, Toast, Root, CardItem } from 'native-base';
 import {connect} from 'react-redux';
 import {Actions} from 'react-native-router-flux';
-import {openChatWindow, updateNotifications, setChatFriendData, changeActiveChatFlag} from '../actions';
+import {openChatWindow, updateNotifications, setChatFriendData, changeActiveChatFlag, fetchChats} from '../actions';
 import IndexHeader from './IndexHeader';
 import IndexFooter from './IndexFooter';
 import MatchedModal from './MatchedModal';
@@ -23,6 +23,10 @@ class ChatsScreen extends Component {
     console.log("constructor state :", this.state);
   }
 
+  componentDidMount() {
+    this.props.fetchChats();
+  }
+
   componentWillReceiveProps(nextProps) {
     if(this.props.chats !== nextProps.chats) {
       this.setState({
@@ -31,11 +35,13 @@ class ChatsScreen extends Component {
     }
   }
 
-  openChatWindow = (chatData) => {
+  openChatWindow = (chatData, activeFlag) => {
     return function (e) {
       console.log("openChatWindow :", chatData);
       //this.props.openChatWindow(chatData.friend);
-      this.props.setChatFriendData(chatData.friend);
+      var chatFriendData = chatData.friend;
+      chatFriendData.chatActiveFlag = activeFlag;
+      this.props.setChatFriendData(chatFriendData);
       Actions.chat();
     }
   };
@@ -80,8 +86,7 @@ class ChatsScreen extends Component {
     console.log("filteredOptionsArr here :", filteredOptionsArr);
     return (
       <TouchableOpacity
-          onPress={this.openChatWindow(chatData).bind(this)}
-          disabled={chatData.activeChatFlag === 'Inactive' ? true : false}
+          onPress={this.openChatWindow(chatData, chatData.activeChatFlag).bind(this)}
           style={chatData.activeChatFlag === 'Inactive' ? {backgroundColor: 'grey'} : {}}
           activeOpacity={1}
       >
@@ -157,5 +162,5 @@ const mapStateToProps = state => {
   };
 };
 
-export default connect(mapStateToProps, {openChatWindow, updateNotifications, setChatFriendData, changeActiveChatFlag})(ChatsScreen);
+export default connect(mapStateToProps, {openChatWindow, updateNotifications, setChatFriendData, changeActiveChatFlag, fetchChats})(ChatsScreen);
 //2 step process, first connect is called, it returns a function, which is called with the component as argument

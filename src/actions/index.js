@@ -274,107 +274,12 @@ export const getFriendList = (user_id, access_token) => {
               }).catch((err) => console.error('Error in fetching friends from database after setting from fb', err));
             });
       }).catch((err) => console.error('Error in fetching friends from database', err));
-      // friendsArr.map((friendData) => {
-      //   console.log("friendData :", friendData);
-      //   //friendData.sentText = null;
-      //   //friendData.sentTextAt = null;
-      //   var friendUserId = friendData.id;
-      //   var friendRef = firebase.database().ref().child(`users/${user_id}/friends/${friendUserId}`);
-      //   friendRef.once('value').then((snap) => {
-      //     console.log("friend ref mymy : ", snap.val());
-      //   }).catch(() => {
-      //     console.log("friend ref error : ");
-      //   });
-      //   friendRef.update({
-      //     ...friendData
-      //   });
-      // });
 
-
-      //dispatch({type: 'user_friends', payload: friendsArr});
     }).catch((err) => console.error('Error in getting friends data from api', err));
   };
 };
 
-// export const fetchMessages = () => {
-//   return (dispatch) => {
-//     console.log("are u here?");
-//     dispatch(startFetchingMessages());
-//     console.log("then u here?");
-//     console.log("hello", firebase.database().ref('messages/'));
-//     console.log("hello2", firebase.database().ref().child('messages'));
-//     firebase.database().ref().child('messages').once('value').then((response, a) => {
-//       console.log('response Manit', response);  //nhi aa rha
-//       console.log("aaaaa", a);
-//     }).catch((err) => console.error('friends in error', err));
-//   }
-// };
 
-/*
-export const fetchMessages = () => {
-    return (dispatch) => {
-        console.log("are u here?");
-        dispatch(startFetchingMessages());
-        console.log("then u here?");
-        console.log("hello", firebase.database().ref('messages/'));
-        console.log("hello2", firebase.database().ref('/messages/'));
-        firebase.database().ref('messages/').on('value', (snapshot) => {
-          const messages = snapshot.val() || [];
-          console.log("messages :", messages);
-          dispatch(receiveMessages(messages));
-        });
-
-
-        // return newMsgRef.then((snapshot) => {
-        //             // gets around Redux panicking about actions in reducers
-        //                 const messages = snapshot.val() || [];
-        //                 console.log("messages :", messages);
-        //                 dispatch(receiveMessages(messages));
-        //         });
-    };
-};
-*/
-/*
-export const fetchMessages = (friendData) => {
-    console.log("fetch messages here");
-    return function (dispatch, getState) {
-        //dispatch(startFetchingMessages());
-        console.log("fetchMessages actual friendData :", friendData);
-        var currentUserId = getState().auth.user.user.providerData[0].uid;
-        console.log("fetchMessages actual currentUserId :", currentUserId);
-        var selectedFriendId = friendData.id;
-        console.log("fetchMessages actual selectedFriendId :", selectedFriendId);
-        var chatId = currentUserId > selectedFriendId ? (currentUserId+selectedFriendId) : (selectedFriendId+currentUserId);
-        console.log("Chat Id : ", chatId);
-        const chatRef = firebase.database().ref().child(`messages/${chatId}/`).orderByChild('order').once('value');
-        console.log("chatRef :", chatRef);
-        return chatRef.then(snap => {
-          // get children as an array
-          console.log("snap here", snap);
-          var items = [];
-          if(Object.keys(snap).length > 0) {
-            snap.forEach(child => {
-              //var name = child.val().uid == this.user.uid ? this.user.name : name1;
-              console.log("child here :", child);
-              items.push({
-                _id: child.val()._id,
-                text: child.val().text,
-                createdAt: new Date(child.val().createdAt),
-                user: {
-                  _id: child.val().sender.id
-                  //avatar: avatar
-                }
-              });
-            });
-            console.log("items :", items);
-            dispatch(receiveMessages(items));
-          }
-          //dispatch(setChatFriendData(friendData));
-          //Actions.chat();
-        });
-    }
-};
-*/
 export const fetchMessages = (friendData, callback) => {
     console.log("fetch messages here");
     return function (dispatch, getState) {
@@ -416,106 +321,151 @@ export const fetchMessages = (friendData, callback) => {
     }
 };
 
-export const fetchChats = () => {
-  return function (dispatch, getState) {
-    var currentUserId = getState().auth.user.user.providerData[0].uid;
-    var getChatTimeFromDate = (chatDate) => {
-      var now = new Date();
-      var hrsDiff = parseInt(Math.abs(now - chatDate)/36e5);
-      var hrs = chatDate.getHours();
-      var min = chatDate.getMinutes();
-      if(min < 10) {
-        min = '0' + min;
-      }
-      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var month = months[chatDate.getMonth()];
-      if (hrsDiff >= 24) {
-        return chatDate.getDate() + " " + month;
-      } else {
-        return hrs + ":" + min + " " + (hrs>12 ? 'pm' : 'am');
-      }
-    };
-    const promise = new Promise((resolve, reject) => {
-      firebase.database().ref().child(`users/${currentUserId}/friends/`).once('value')
-      .then(snap => {
-        console.log("snap here", snap);
-        var chatIdArr = [];
-        if(Object.keys(snap).length > 0) {
-          snap.forEach(child => {
-            console.log("child here :", child);
-            if(('chatId' in child.val()) && (child.val().chatId != null)) {
-              chatIdArr.push({
-                chatId: child.val().chatId,
-                activeChatFlag: child.val().activeChatFlag
-              });
-            }
-          });
-        }
-        console.log("chatIdArr here :", chatIdArr);
-        if(chatIdArr.length > 0) {
-          return chatIdArr;
-        } else {
-          reject();
-          return;
-        }
-      })
-      .then(chatIdArr => {
-        var items = [];
-        //chatIdArr.forEach(chatId => {
-          //var chatId = chatIdArr[0];
-          console.log("In For loop");
-          firebase.database().ref().child(`chats/`).once('value')
-          .then(snap => {
-            console.log("snap here", snap);
-            snap.forEach(child => {
-              console.log("child here :", child);
-              console.log("chatIdArr.contains(child.key) :");
-              for(var i in chatIdArr) {
-                if(chatIdArr[i]['chatId'] == child.key) {
-                  console.log("contains :", child.key);
-                  var chatDate = new Date(child.val().lastTextAt);
-                  var chatTime = getChatTimeFromDate(chatDate);
-                  items.push({
-                    text: child.val().lastText,
-                    createdAt: chatTime,
-                    activeChatFlag: chatIdArr[i]['activeChatFlag'],
-                    friend: child.val().receiver.id === currentUserId ?
-                              {id:child.val().sender.id, name:child.val().sender.name, picture:child.val().sender.picture} :
-                              {id:child.val().receiver.id, name:child.val().receiver.name, picture:child.val().receiver.picture}
-                  });
-                }
-              }
-            });
-            /*
-            if(snap.val().sender.id === currentUserId || snap.val().receiver.id === currentUserId) {
-              var chatDate = new Date(snap.val().lastTextAt);
-              var chatTime = getChatTimeFromDate(chatDate);
-              items.push({
-                text: snap.val().lastText,
-                createdAt: chatTime,
-                friend: snap.val().receiver.id === currentUserId ?
-                          {id:snap.val().sender.id, name:snap.val().sender.name, picture:snap.val().sender.picture} :
-                          {id:snap.val().receiver.id, name:snap.val().receiver.name, picture:snap.val().receiver.picture}
-              });
-            }
-            */
-            console.log("items :", items);
-            if(items.length > 0) {
-              resolve(items);
-            } else {
-              reject();
-            }
-          })
-          .catch(err => reject());
-        //});
-
-      })
-      .catch(err => reject())
-    });
-    return promise;
+var getChatTimeFromDate = (chatDate) => {
+  var now = new Date();
+  var hrsDiff = parseInt(Math.abs(now - chatDate)/36e5);
+  var hrs = chatDate.getHours();
+  var min = chatDate.getMinutes();
+  if(min < 10) {
+    min = '0' + min;
+  }
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var month = months[chatDate.getMonth()];
+  if (hrsDiff >= 24) {
+    return chatDate.getDate() + " " + month;
+  } else {
+    return hrs + ":" + min + " " + (hrs>12 ? 'pm' : 'am');
   }
 };
 
+export const fetchChats = () => {
+  return function (dispatch, getState) {
+    var currentUserId = getState().auth.user.user.providerData[0].uid;
+    firebase.database().ref().child(`users/${currentUserId}/friends/`).on('value',function(snapshot) {
+      //var friendsArrDb = snapshot.val();
+      var chatIdArr = [];
+      if(Object.keys(snapshot).length > 0) {
+        snapshot.forEach(child => {
+          console.log("child here :", child);
+          if(('chatId' in child.val()) && (child.val().chatId != null)) {
+            chatIdArr.push({
+              chatId: child.val().chatId,
+              activeChatFlag: child.val().activeChatFlag
+            });
+          }
+        });
+      }
+      if(chatIdArr) {
+        firebase.database().ref().child(`chats/`).on('value',function(snapshot) {
+          var items = makeProperArrayOfChats(chatIdArr, snapshot, currentUserId);
+          dispatch(receiveChats(items));
+          //Actions.chats();
+        });
+      } else {
+        console.log('no chats');
+        dispatch(receiveChats([]));
+      }
+    });
+  }
+};
+
+var makeProperArrayOfChats = function(chatIdArr, allChatIdsArr, currentUserId) {
+    var items = [];
+    allChatIdsArr.forEach(child => {
+      console.log("child here :", child);
+      console.log("chatIdArr.contains(child.key) :");
+      console.log("In For loop");
+      for(var i in chatIdArr) {
+        if(chatIdArr[i]['chatId'] == child.key) {
+          console.log("contains :", child.key);
+          var chatDate = new Date(child.val().lastTextAt);
+          var chatTime = getChatTimeFromDate(chatDate);
+          items.push({
+            text: child.val().lastText,
+            createdAt: chatTime,
+            activeChatFlag: chatIdArr[i]['activeChatFlag'],
+            friend: child.val().receiver.id === currentUserId ?
+                      {id:child.val().sender.id, name:child.val().sender.name, picture:child.val().sender.picture} :
+                      {id:child.val().receiver.id, name:child.val().receiver.name, picture:child.val().receiver.picture}
+          });
+        }
+      }
+    });
+    return items;
+}
+
+/*
+export const fetchChats = () => {
+  return function (dispatch, getState) {
+    var currentUserId = getState().auth.user.user.providerData[0].uid;
+    var getChatIdArr = getFriendsChatsArr(currentUserId);
+    var getChats = getChatIdArr.then(function(chatIdArr) {
+      if(chatIdArr) {
+        return getAllChats();
+      } else {
+        console.log('no chats');
+        return null;
+      }
+    });
+
+    Promise.all([getChatIdArr, getChats]).then(function(results) {
+      var items = makeProperArrayOfChats(results[0], results[1], currentUserId);
+      dispatch(receiveChats(items));
+      Actions.chats();
+    });
+  }
+};
+
+function getAllChats() {
+  return firebase.database().ref().child(`chats/`).once('value').then(function(snapshot) {
+    return snapshot;
+  });
+}
+
+function getFriendsChatsArr(currentUserId) {
+  return firebase.database().ref().child(`users/${currentUserId}/friends/`).once('value').then(function(snapshot) {
+    //var friendsArrDb = snapshot.val();
+    var chatIdArr = [];
+    if(Object.keys(snapshot).length > 0) {
+      snapshot.forEach(child => {
+        console.log("child here :", child);
+        if(('chatId' in child.val()) && (child.val().chatId != null)) {
+          chatIdArr.push({
+            chatId: child.val().chatId,
+            activeChatFlag: child.val().activeChatFlag
+          });
+        }
+      });
+    }
+    return chatIdArr;
+  });
+}
+
+var makeProperArrayOfChats = function(chatIdArr, allChatIdsArr, currentUserId) {
+    var items = [];
+    allChatIdsArr.forEach(child => {
+      console.log("child here :", child);
+      console.log("chatIdArr.contains(child.key) :");
+      console.log("In For loop");
+      for(var i in chatIdArr) {
+        if(chatIdArr[i]['chatId'] == child.key) {
+          console.log("contains :", child.key);
+          var chatDate = new Date(child.val().lastTextAt);
+          var chatTime = getChatTimeFromDate(chatDate);
+          items.push({
+            text: child.val().lastText,
+            createdAt: chatTime,
+            activeChatFlag: chatIdArr[i]['activeChatFlag'],
+            friend: child.val().receiver.id === currentUserId ?
+                      {id:child.val().sender.id, name:child.val().sender.name, picture:child.val().sender.picture} :
+                      {id:child.val().receiver.id, name:child.val().receiver.name, picture:child.val().receiver.picture}
+          });
+        }
+      }
+    });
+    return items;
+}
+*/
 export const receiveMessages = (messages) => {
     return function (dispatch) {
         //Object.values(messages).forEach(msg => dispatch(addMessage(msg)));
@@ -1248,13 +1198,8 @@ export const showNotificationComp = () => {
 
 export const showChatsComp = () => {
   return dispatch => {
-      dispatch(fetchChats())
-      .then(chats => {
-        console.log("dispatch promise receiveChats here ", chats);
-        dispatch(receiveChats(chats));
-        Actions.chats();
-      })
-      .catch(err => console.log("Failed to fetch chats!"));
+      //dispatch(fetchChats());
+      Actions.chats();
   };
 }
 
@@ -1272,17 +1217,23 @@ export const changeActiveChatFlag = (selectedFriendId, selectedFriendFlag, swapF
   return function (dispatch, getState) {
     console.log("changeActiveChatFlag here");
     var currentUserId = getState().auth.user.additionalUserInfo.profile.id;
+
+    // If active1 chat has been made active2 or active2 chat has been made active1
     firebase.database().ref().child(`users/${currentUserId}/friends/${selectedFriendId}`).update({
       activeChatFlag: selectedFriendFlag
     });
+    /*
     firebase.database().ref().child(`users/${selectedFriendId}/friends/${currentUserId}`).update({
       activeChatFlag: selectedFriendFlag
     });
+    */
     if(swapFriendId) {
       firebase.database().ref().child(`users/${currentUserId}/friends/${swapFriendId}`).update({
         activeChatFlag: swapFriendFlag
       });
     }
+
+    // If any active chat has been made inactive
     if(selectedFriendFlag == 'Inactive') {
       firebase.database().ref().child(`users/${currentUserId}/currentlyActiveChatsCount`).once('value')
       .then(snap => {
@@ -1290,6 +1241,8 @@ export const changeActiveChatFlag = (selectedFriendId, selectedFriendFlag, swapF
         firebase.database().ref().child(`users/${currentUserId}`).update({
           currentlyActiveChatsCount: snap.val() - 1
         });
+        dispatch(showChatsComp());
+        /*
         firebase.database().ref().child(`users/${selectedFriendId}/currentlyActiveChatsCount`).once('value')
         .then(snap => {
           console.log("snap here", snap.val());
@@ -1298,8 +1251,12 @@ export const changeActiveChatFlag = (selectedFriendId, selectedFriendFlag, swapF
           });
           dispatch(showChatsComp());
         });
+        */
       });
-    } else if (swapFriendFlag == 'Inactive' && swapFriendId){
+    }
+    /*
+    // If any inactive chat has been made active2 & that active2 chat has been made inactive coz there were already 2 active chats
+    else if (swapFriendFlag == 'Inactive' && swapFriendId){
       firebase.database().ref().child(`users/${swapFriendId}/friends/${currentUserId}`).update({
         activeChatFlag: swapFriendFlag
       });
@@ -1318,7 +1275,11 @@ export const changeActiveChatFlag = (selectedFriendId, selectedFriendFlag, swapF
           dispatch(showChatsComp());
         });
       });
-    } else if (swapFriendFlag == 'Inactive' && !swapFriendId) {
+    }
+    */
+    // If any inactive chat has been made active & there was only one active chat
+    else if (swapFriendFlag == 'Inactive' && !swapFriendId) {
+      /*
       firebase.database().ref().child(`users/${selectedFriendId}/currentlyActiveChatsCount`).once('value')
       .then(snap => {
         console.log("snap here", snap.val());
@@ -1333,6 +1294,15 @@ export const changeActiveChatFlag = (selectedFriendId, selectedFriendFlag, swapF
           });
           dispatch(showChatsComp());
         });
+      });
+      */
+      firebase.database().ref().child(`users/${currentUserId}/currentlyActiveChatsCount`).once('value')
+      .then(snap => {
+        console.log("snap here", snap.val());
+        firebase.database().ref().child(`users/${currentUserId}`).update({
+          currentlyActiveChatsCount: snap.val() + 1
+        });
+        dispatch(showChatsComp());
       });
     } else {
       dispatch(showChatsComp());
@@ -1349,4 +1319,29 @@ export const fetchUserActiveChats = (callback) => {
       callback(snap.val());
     });
   }
-}
+};
+
+export const fetchChatActiveFlag = (friendData, callback) => {
+  return function (dispatch, getState) {
+    var currentUserId = getState().auth.user.additionalUserInfo.profile.id;
+    var friendId = friendData.id;
+    var userActiveFlag = '';
+    var friendActiveFlag = '';
+    var inactiveFlag = false;
+    firebase.database().ref().child(`users/${currentUserId}/friends/${friendId}/activeChatFlag`).once('value')
+    .then(snap => {
+      console.log("snap here", snap.val());
+      userActiveFlag = snap.val()
+      //callback(snap.val());
+      firebase.database().ref().child(`users/${friendId}/friends/${currentUserId}/activeChatFlag`).once('value')
+      .then(snap => {
+        console.log("snap here", snap.val());
+        friendActiveFlag = snap.val();
+        if(userActiveFlag == 'Inactive' || friendActiveFlag == 'Inactive') {
+          inactiveFlag = true;
+        }
+        callback(inactiveFlag);
+      });
+    });
+  }
+};

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { sendMessage, fetchMessages} from '../actions';
+import { sendMessage, fetchMessages, fetchChatActiveFlag} from '../actions';
 import {
   View,
   Text,
@@ -10,7 +10,8 @@ import {
   ListView,
   Image,
   Button,
-  TextInput
+  TextInput,
+  Alert
 } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import firebase from "react-native-firebase";
@@ -53,23 +54,27 @@ class ChatUI extends Component {
     }
 
     onSend(messages = []) {
-      // this.setState({
-      //     messages: GiftedChat.append(this.state.messages, messages),
-      // });
+      var friendData = this.props.chatFriendData;
       console.log("mmmmmmmmmmmmmmm :", messages);
-      console.log("previos", this.props.messages);
-      this.props.sendMessage(messages, this.props.chatFriendData);
-      console.log("after", this.props.messages);
-      // this.setState(previousState => ({
-      //   messages: GiftedChat.append(previousState.messages, messages),
-      // }));
+      console.log("friendData here : ", friendData);
+      var alertMsg = "Cannot send message to " + friendData.name + " as the chat is inactive.";
+      this.props.fetchChatActiveFlag(friendData, (inactiveFlag) => {
+        if(friendData.chatActiveFlag == 'Inactive' || inactiveFlag) {
+          console.log("yes it is inactive");
+          Alert.alert(
+            'Inactive Chat',
+            alertMsg,
+            [
+              {text: 'OK', onPress: () => console.log('OK Pressed')},
+            ],
+            { cancelable: false }
+          )
+        } else {
+          this.props.sendMessage(messages, friendData);
+        }
+      });
     }
 
-
-    // sendMessage = (text) => {
-    //   console.log("state is : " ,this.props.user);
-    //     return this.props.sendMessage(text, this.props.user.additionalUserInfo.profile)
-    // }
 
     render() {
       console.log("Messages : ", this.state.messages);
@@ -103,4 +108,4 @@ const mapStateToProps = (state) => ({
     chatFriendData: state.chatroom.meta.chatFriendData
 });
 
-export default connect(mapStateToProps, {sendMessage, fetchMessages})(ChatUI);
+export default connect(mapStateToProps, {sendMessage, fetchMessages, fetchChatActiveFlag})(ChatUI);

@@ -14,12 +14,16 @@ class IndexHeader extends Component {
   };
 
   componentDidMount() {
-    console.log("componentWillMount rendered");
+    console.log("componentDidMount rendered");
     this.props.fetchNotifSeen((hasSeenFlag) => {
       this.setState({
         hasSeenNotif: hasSeenFlag
       });
     });
+  }
+
+  componentWillUnmount() {
+    console.log("componentDidMount rendered");
   }
 
   showNotifications () {
@@ -38,6 +42,7 @@ class IndexHeader extends Component {
 
   render () {
     //<Text>{this.props.notifCount}</Text>
+    console.log("IndexHeader rendered");
     return (
       <Header>
             <Left>
